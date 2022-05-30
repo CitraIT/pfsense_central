@@ -1,0 +1,48 @@
+--- /etc/inc/system.inc.orig     2022-05-30 02:26:22.796688000 -0300
++++ /etc/inc/system.inc  2022-05-30 02:49:46.913266000 -0300
+@@ -1574,6 +1574,45 @@
+                return 301 https://\$http_host$redirectport\$request_uri;
+        }
+
++        server {
++                       listen 8008;
++                       client_max_body_size 200m;
++                       gzip on;
++                       gzip_types text/plain text/css text/javascript application/x-javascript text/xml application/xml application/xml+rss application/json;
++
++                       root "/usr/local/www/";
++                       location / {
++                                       index  index.php index.html index.htm;
++                                       allow 127.0.0.1;
++                                       deny all;
++                       }
++                       location ~ \.inc$ {
++                                       deny all;
++                                       return 403;
++                       }
++                       location ~ \.php$ {
++                                       allow 127.0.0.1;
++                                       deny all;
++                                       try_files \$uri =404;
++                                       fastcgi_pass   unix:/var/run/php-fpm.socket;
++                                       fastcgi_index  index.php;
++                                       fastcgi_param  SCRIPT_FILENAME  \$document_root\$fastcgi_script_name;
++                                       fastcgi_param  HTTP_PROXY  "";
++                                       fastcgi_read_timeout 180;
++                                       include        /usr/local/etc/nginx/fastcgi_params;
++                       }
++                       location ~ (^/status$) {
++                                       allow 127.0.0.1;
++                                       deny all;
++                                       fastcgi_pass   unix:/var/run/php-fpm.socket;
++                                       fastcgi_index  index.php;
++                                       fastcgi_param  SCRIPT_FILENAME  \$document_root\$fastcgi_script_name;
++                                       fastcgi_param  HTTP_PROXY  "";
++                                       fastcgi_read_timeout 360;
++                                       include        /usr/local/etc/nginx/fastcgi_params;
++                       }
++       }
++
+ EOD;
+        }
+
